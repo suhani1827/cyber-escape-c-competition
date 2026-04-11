@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyber Escape — Locked In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --purple: #c084fc; --purple-bright: #e879f9; --purple-dark: #9333ea;
+  --purple-deep: #6b21a8; --purple-glow: rgba(192,132,252,0.3);
+  --neon: #f0abfc; --blue: #22d3ee; --bg: #07040f; --bg2: #0d0720;
+  --bg3: #130a2a; --surface: rgba(192,132,252,0.05); --surface2: rgba(192,132,252,0.1);
+  --border: rgba(192,132,252,0.15); --border2: rgba(192,132,252,0.4);
+  --text: #f0e8ff; --text2: #a88bc8; --text3: #5a4570;
+  --success: #10b981; --danger: #f43f5e;
+  --font: 'DM Sans',sans-serif; --font-display: 'Syne',sans-serif;
+  --font-code: 'JetBrains Mono',monospace; --radius: 14px;
+}
+html,body { height:100%; width:100%; overflow:hidden; font-family:var(--font); background:var(--bg); color:var(--text); user-select:none; }
+.screen { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; }
+.screen.hidden { display:none; }
+
+/* ════ SPLASH / LANDING SCREEN ════ */
+#splash-screen {
+  flex-direction:column; align-items:center; justify-content:center;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(147,51,234,0.45) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 10% 100%, rgba(232,121,249,0.25) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 60% at 90% 80%, rgba(109,40,217,0.3) 0%, transparent 60%),
+    linear-gradient(180deg,#07040f 0%,#0d0520 40%,#07040f 100%);
+  z-index:100;
+}
+#splash-screen::before {
+  content:''; position:absolute; inset:0;
+  background-image:
+    linear-gradient(rgba(192,132,252,0.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(192,132,252,0.07) 1px,transparent 1px);
+  background-size:50px 50px; pointer-events:none;
+}
+#splash-screen::after {
+  content:''; position:absolute; inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.12) 2px,rgba(0,0,0,0.12) 4px);
+  pointer-events:none; z-index:1;
+}
+.splash-content { position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap:44px; text-align:center; }
+.splash-badge {
+  font-family:var(--font-code); font-size:11px; letter-spacing:4px; color:var(--purple); text-transform:uppercase;
+  background:rgba(192,132,252,0.1); border:1px solid rgba(192,132,252,0.35); padding:5px 18px; border-radius:20px;
+  animation:pulse-badge 2s ease-in-out infinite;
+}
+@keyframes pulse-badge { 0%,100%{box-shadow:0 0 10px rgba(192,132,252,0.2);}50%{box-shadow:0 0 25px rgba(192,132,252,0.55),0 0 50px rgba(192,132,252,0.2);} }
+.splash-title {
+  font-family:var(--font-display); font-size:clamp(46px,7.5vw,88px); font-weight:800; line-height:0.9;
+  background:linear-gradient(135deg,#f0abfc,#c084fc,#9333ea,#6b21a8);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  filter:drop-shadow(0 0 40px rgba(192,132,252,0.5)); letter-spacing:-2px;
+}
+.splash-subtitle { font-family:var(--font-code); font-size:14px; color:var(--text2); letter-spacing:3px; text-transform:uppercase; margin-top:6px; }
+.splash-desc { font-size:15px; color:var(--text2); max-width:520px; line-height:1.75; margin-top:-12px; }
+
+/* monitor illustration */
+.splash-monitor { position:relative; width:280px; filter:drop-shadow(0 0 50px rgba(192,132,252,0.4)); }
+.monitor-body {
+  background:linear-gradient(160deg,#1a0d30,#0d0720); border:2px solid rgba(192,132,252,0.5);
+  border-radius:12px; padding:16px; position:relative; overflow:hidden;
+}
+.monitor-body::before {
+  content:''; position:absolute; inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(192,132,252,0.03) 3px,rgba(192,132,252,0.03) 4px);
+  pointer-events:none;
+}
+.monitor-screen {
+  background:#000; border-radius:6px; height:130px; padding:12px;
+  font-family:var(--font-code); font-size:11px; overflow:hidden; position:relative;
+  border:1px solid rgba(192,132,252,0.3);
+}
+.monitor-screen::after { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,0.4)); }
+.type-line { color:#c084fc; line-height:1.8; }
+.type-line.dim { color:#5a4070; }
+.type-cursor { display:inline-block; width:8px; height:12px; background:#c084fc; animation:blink 1s step-end infinite; vertical-align:middle; }
+@keyframes blink { 0%,100%{opacity:1;}50%{opacity:0;} }
+.monitor-stand { display:flex; flex-direction:column; align-items:center; }
+.monitor-neck { width:30px; height:20px; background:linear-gradient(180deg,#1a0d30,#0d0720); border-left:2px solid rgba(192,132,252,0.3); border-right:2px solid rgba(192,132,252,0.3); }
+.monitor-base { width:120px; height:8px; background:linear-gradient(90deg,transparent,rgba(192,132,252,0.3),rgba(192,132,252,0.5),rgba(192,132,252,0.3),transparent); border-radius:4px; }
+
+/* lab choice cards */
+.lab-selection { display:flex; gap:22px; }
+.lab-card {
+  position:relative; width:230px; padding:30px 26px;
+  background:rgba(13,7,32,0.85); border:1px solid rgba(192,132,252,0.25); border-radius:22px;
+  cursor:pointer; transition:all 0.3s cubic-bezier(0.34,1.4,0.64,1); overflow:hidden; backdrop-filter:blur(20px);
+}
+.lab-card::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 50% 0%,rgba(192,132,252,0.14),transparent 70%); opacity:0; transition:opacity 0.3s; }
+.lab-card:hover::before { opacity:1; }
+.lab-card:hover { transform:translateY(-10px) scale(1.02); border-color:rgba(192,132,252,0.65); box-shadow:0 24px 70px rgba(147,51,234,0.35),0 0 0 1px rgba(192,132,252,0.2); }
+.lab-card:active { transform:scale(0.97); }
+.lab-card-glow { position:absolute; top:-30px; right:-30px; width:110px; height:110px; border-radius:50%; filter:blur(32px); opacity:0.4; transition:opacity 0.3s; }
+.lab-card.python .lab-card-glow { background:#c084fc; }
+.lab-card.c-lang .lab-card-glow { background:#22d3ee; }
+.lab-card:hover .lab-card-glow { opacity:0.75; }
+.lab-card-icon { font-size:42px; margin-bottom:16px; display:block; filter:drop-shadow(0 0 14px rgba(192,132,252,0.5)); }
+.lab-card-name { font-family:var(--font-display); font-size:23px; font-weight:700; margin-bottom:8px; }
+.lab-card.python .lab-card-name { color:var(--purple); }
+.lab-card.c-lang .lab-card-name { color:var(--blue); }
+.lab-card-desc { font-size:12px; color:var(--text2); line-height:1.55; margin-bottom:22px; }
+.lab-card-btn {
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  padding:9px 0; border-radius:9px; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; border:1px solid; transition:all 0.2s;
+}
+.lab-card.python .lab-card-btn { background:rgba(192,132,252,0.15); border-color:rgba(192,132,252,0.45); color:var(--purple); }
+.lab-card.c-lang  .lab-card-btn { background:rgba(34,211,238,0.1);  border-color:rgba(34,211,238,0.45);  color:var(--blue); }
+.lab-card:hover .lab-card-btn { background:rgba(192,132,252,0.28); }
+.lab-levels-count { position:absolute; top:14px; right:14px; font-family:var(--font-code); font-size:10px; background:rgba(192,132,252,0.1); border:1px solid rgba(192,132,252,0.3); border-radius:12px; padding:2px 8px; color:var(--purple); }
+
+/* ════ LEVELS SCREEN ════ */
+#levels-screen {
+  background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(147,51,234,0.2) 0%,transparent 70%),linear-gradient(180deg,#07040f,#0d0720);
+  flex-direction:column; padding:40px; overflow-y:auto;
+}
+#levels-screen::before { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(192,132,252,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(192,132,252,0.05) 1px,transparent 1px); background-size:60px 60px; pointer-events:none; }
+.levels-page-content { position:relative; z-index:2; width:100%; max-width:960px; }
+.levels-back-btn { display:flex; align-items:center; gap:8px; background:rgba(192,132,252,0.1); border:1px solid rgba(192,132,252,0.3); border-radius:8px; padding:8px 16px; cursor:pointer; color:var(--purple); font-size:13px; font-family:var(--font); transition:all 0.2s; margin-bottom:32px; width:fit-content; }
+.levels-back-btn:hover { background:rgba(192,132,252,0.2); }
+.levels-page-header { margin-bottom:32px; text-align:center; }
+.levels-page-lab-icon { font-size:48px; margin-bottom:12px; filter:drop-shadow(0 0 20px rgba(192,132,252,0.5)); }
+.levels-page-title { font-family:var(--font-display); font-size:34px; font-weight:800; }
+.levels-page-title span { background:linear-gradient(90deg,var(--purple),var(--purple-bright)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.levels-page-subtitle { font-family:var(--font-code); font-size:12px; color:var(--text2); letter-spacing:2px; margin-top:6px; }
+.levels-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:14px; justify-items:center; }
+.mini-computer { position:relative; cursor:pointer; transition:all 0.3s cubic-bezier(0.34,1.4,0.64,1); width:110px; }
+.mini-computer:hover:not(.locked) { transform:translateY(-8px) scale(1.05); }
+.mini-computer.locked { opacity:0.4; cursor:not-allowed; filter:grayscale(0.5); }
+.mini-monitor-body { background:linear-gradient(160deg,#1a0d30,#0d0720); border:2px solid rgba(192,132,252,0.3); border-radius:8px; padding:8px; position:relative; box-shadow:0 4px 20px rgba(0,0,0,0.4); transition:all 0.3s; }
+.mini-computer:hover:not(.locked) .mini-monitor-body { border-color:rgba(192,132,252,0.7); box-shadow:0 8px 30px rgba(147,51,234,0.4),0 0 0 1px rgba(192,132,252,0.2); }
+.mini-computer.done .mini-monitor-body { border-color:rgba(16,185,129,0.5); box-shadow:0 4px 20px rgba(16,185,129,0.2); }
+.mini-computer.active .mini-monitor-body { border-color:rgba(232,121,249,0.8); box-shadow:0 0 20px rgba(232,121,249,0.4),0 0 40px rgba(192,132,252,0.2); animation:pulse-computer 2s ease-in-out infinite; }
+@keyframes pulse-computer { 0%,100%{box-shadow:0 0 15px rgba(232,121,249,0.4);}50%{box-shadow:0 0 30px rgba(232,121,249,0.7),0 0 60px rgba(192,132,252,0.3);} }
+.mini-screen { background:#000; border-radius:4px; height:56px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:3px; border:1px solid rgba(192,132,252,0.2); position:relative; overflow:hidden; }
+.mini-screen::before { content:''; position:absolute; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(192,132,252,0.02) 2px,rgba(192,132,252,0.02) 4px); pointer-events:none; }
+.mini-level-num { font-family:var(--font-code); font-size:17px; font-weight:500; z-index:1; line-height:1; }
+.mini-level-icon { font-size:10px; z-index:1; }
+.mini-computer.done .mini-level-num { color:var(--success); }
+.mini-computer.active .mini-level-num { color:var(--purple-bright); text-shadow:0 0 10px var(--purple-bright); }
+.mini-computer:not(.done):not(.active):not(.locked) .mini-level-num { color:var(--purple); }
+.mini-computer.locked .mini-level-num { color:#3a2a50; }
+.mini-neck { width:18px; height:10px; background:linear-gradient(180deg,#1a0d30,#0d0720); border-left:2px solid rgba(192,132,252,0.2); border-right:2px solid rgba(192,132,252,0.2); margin:0 auto; }
+.mini-base { width:60px; height:5px; background:rgba(192,132,252,0.2); border-radius:3px; margin:0 auto; }
+.mini-computer-label { text-align:center; margin-top:7px; font-family:var(--font-code); font-size:9px; color:var(--text2); letter-spacing:1px; line-height:1.3; }
+
+/* ════ DESKTOP SCREEN ════ */
+#desktop-screen {
+  background:radial-gradient(ellipse 80% 60% at 20% 80%,rgba(147,51,234,0.15) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 80% 20%,rgba(232,121,249,0.1) 0%,transparent 55%),linear-gradient(160deg,#07040f 0%,#0d0720 40%,#0a0418 100%);
+  display:block; overflow:hidden;
+}
+#desktop-screen::before { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(192,132,252,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(192,132,252,0.05) 1px,transparent 1px); background-size:60px 60px; pointer-events:none; }
+.neon-orb { position:fixed; border-radius:50%; filter:blur(80px); pointer-events:none; z-index:0; animation:orb-float 8s ease-in-out infinite; }
+.neon-orb-1 { width:400px; height:400px; background:rgba(147,51,234,0.12); top:-100px; left:-100px; }
+.neon-orb-2 { width:300px; height:300px; background:rgba(232,121,249,0.1); bottom:-50px; right:-50px; animation-delay:-3s; }
+.neon-orb-3 { width:250px; height:250px; background:rgba(192,132,252,0.08); top:50%; left:50%; transform:translate(-50%,-50%); animation-delay:-6s; }
+@keyframes orb-float { 0%,100%{transform:translate(0,0);}33%{transform:translate(20px,-20px);}66%{transform:translate(-15px,15px);} }
+
+#statusbar { position:fixed; top:0; left:0; right:0; height:32px; background:rgba(7,4,15,0.8); backdrop-filter:blur(20px); border-bottom:1px solid rgba(192,132,252,0.15); display:flex; align-items:center; padding:0 20px; z-index:9000; font-size:12px; color:var(--text2); }
+#statusbar .logo { font-family:var(--font-display); font-size:13px; font-weight:700; color:var(--purple); margin-right:auto; letter-spacing:3px; text-shadow:0 0 10px rgba(192,132,252,0.5); }
+#statusbar .status-items { display:flex; gap:20px; align-items:center; }
+#statusbar .status-pill { display:flex; align-items:center; gap:5px; background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:2px 10px; font-size:11px; }
+.dot { width:6px; height:6px; border-radius:50%; }
+.dot.green { background:var(--success); box-shadow:0 0 6px var(--success); }
+.dot.blue { background:var(--blue); box-shadow:0 0 6px var(--blue); }
+.dot.purple { background:var(--purple); box-shadow:0 0 6px var(--purple); animation:dot-pulse 2s ease-in-out infinite; }
+@keyframes dot-pulse { 0%,100%{opacity:1;}50%{opacity:0.4;} }
+#clock { font-family:var(--font-code); font-size:12px; color:var(--text); }
+
+#icons-area { position:fixed; top:50px; left:30px; display:flex; flex-direction:column; gap:12px; z-index:100; }
+.desk-icon { display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; width:80px; padding:10px 6px; border-radius:12px; transition:background 0.15s,transform 0.15s; }
+.desk-icon:hover { background:rgba(192,132,252,0.08); transform:translateY(-2px); }
+.desk-icon:active { transform:scale(0.95); }
+.icon-img { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:24px; }
+.icon-img.purple-glass { background:linear-gradient(145deg,rgba(192,132,252,0.35),rgba(147,51,234,0.2)); border:1px solid rgba(192,132,252,0.45); box-shadow:0 4px 20px rgba(147,51,234,0.3),0 0 20px rgba(192,132,252,0.15); }
+.icon-img.blue-glass { background:linear-gradient(145deg,rgba(34,211,238,0.3),rgba(8,145,178,0.2)); border:1px solid rgba(34,211,238,0.35); box-shadow:0 4px 20px rgba(34,211,238,0.2); }
+.icon-img.gray-glass { background:linear-gradient(145deg,rgba(192,132,252,0.12),rgba(192,132,252,0.04)); border:1px solid rgba(192,132,252,0.15); box-shadow:0 4px 16px rgba(0,0,0,0.4); }
+.icon-img.danger-glass { background:linear-gradient(145deg,rgba(244,63,94,0.25),rgba(190,30,60,0.15)); border:1px solid rgba(244,63,94,0.3); box-shadow:0 4px 16px rgba(244,63,94,0.15); }
+.desk-icon span { font-size:11px; color:var(--text); text-align:center; line-height:1.3; text-shadow:0 1px 4px rgba(0,0,0,0.8); }
+
+#dock { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); display:flex; gap:8px; align-items:flex-end; background:rgba(7,4,15,0.75); backdrop-filter:blur(24px); border:1px solid rgba(192,132,252,0.2); border-radius:22px; padding:10px 16px; z-index:9000; box-shadow:0 8px 40px rgba(0,0,0,0.6),0 0 0 1px rgba(192,132,252,0.08),0 0 30px rgba(147,51,234,0.1); }
+.dock-icon { width:48px; height:48px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:22px; cursor:pointer; transition:transform 0.2s cubic-bezier(0.34,1.56,0.64,1); position:relative; }
+.dock-icon:hover { transform:scale(1.25) translateY(-6px); }
+.dock-icon .tooltip { position:absolute; bottom:115%; left:50%; transform:translateX(-50%); background:rgba(7,4,15,0.9); border:1px solid var(--border); border-radius:6px; padding:4px 10px; font-size:11px; white-space:nowrap; pointer-events:none; opacity:0; transition:opacity 0.15s; }
+.dock-icon:hover .tooltip { opacity:1; }
+.dock-sep { width:1px; height:36px; background:rgba(192,132,252,0.2); margin:0 4px; }
+
+/* ════ WINDOWS ════ */
+.win { position:fixed; background:rgba(7,4,15,0.92); backdrop-filter:blur(30px); border:1px solid rgba(192,132,252,0.2); border-radius:var(--radius); box-shadow:0 24px 80px rgba(0,0,0,0.7),0 0 0 1px rgba(192,132,252,0.05),0 0 60px rgba(147,51,234,0.1); z-index:500; display:flex; flex-direction:column; overflow:hidden; transform-origin:center top; animation:winOpen 0.25s cubic-bezier(0.34,1.4,0.64,1) forwards; }
+@keyframes winOpen { from{transform:scale(0.92) translateY(10px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;} }
+.win.closing { animation:winClose 0.18s ease-in forwards; }
+@keyframes winClose { to{transform:scale(0.9) translateY(8px);opacity:0;} }
+.win.minimized { display:none; }
+.win-titlebar { display:flex; align-items:center; padding:10px 14px; background:rgba(192,132,252,0.04); border-bottom:1px solid rgba(192,132,252,0.12); cursor:move; gap:10px; flex-shrink:0; }
+.win-controls { display:flex; gap:6px; }
+.wc { width:12px; height:12px; border-radius:50%; cursor:pointer; transition:filter 0.1s; }
+.wc:hover { filter:brightness(1.3); }
+.wc.close { background:#f43f5e; } .wc.min { background:#f59e0b; } .wc.max { background:#10b981; }
+.win-title { font-size:13px; font-weight:500; color:var(--text2); flex:1; text-align:center; font-family:var(--font-display); letter-spacing:0.5px; }
+.win-badge { font-size:10px; background:rgba(192,132,252,0.1); border:1px solid rgba(192,132,252,0.4); border-radius:20px; padding:2px 8px; color:var(--purple); font-family:var(--font-code); }
+.win-body { flex:1; overflow:hidden; display:flex; flex-direction:column; }
+.lab-window { width:900px; height:620px; top:70px; left:180px; }
+#c-lab-win { left:220px; top:90px; }
+.lab-layout { display:flex; flex:1; overflow:hidden; }
+.levels-panel { width:190px; flex-shrink:0; border-right:1px solid rgba(192,132,252,0.12); overflow-y:auto; padding:12px 8px; background:rgba(0,0,0,0.2); }
+.levels-panel::-webkit-scrollbar { width:4px; }
+.levels-panel::-webkit-scrollbar-thumb { background:rgba(192,132,252,0.3); border-radius:4px; }
+.levels-header { font-size:10px; font-weight:600; letter-spacing:2px; color:var(--text2); padding:0 8px 10px; text-transform:uppercase; }
+.level-btn { display:flex; align-items:center; gap:8px; width:100%; padding:7px 10px; border-radius:8px; border:none; background:transparent; cursor:pointer; color:var(--text2); font-size:11px; font-family:var(--font); transition:all 0.15s; margin-bottom:2px; text-align:left; }
+.level-btn:hover { background:var(--surface2); color:var(--text); }
+.level-btn.active { background:linear-gradient(90deg,rgba(192,132,252,0.2),rgba(192,132,252,0.05)); color:var(--purple); border:1px solid rgba(192,132,252,0.3); }
+.level-btn.locked { opacity:0.35; cursor:not-allowed; }
+.level-btn.done { color:var(--success); }
+.level-num { font-family:var(--font-code); font-size:10px; min-width:20px; }
+.level-lock { margin-left:auto; font-size:10px; }
+
+.editor-area { flex:1; overflow:hidden; display:flex; flex-direction:column; }
+.level-header { padding:12px 20px; border-bottom:1px solid rgba(192,132,252,0.12); display:flex; align-items:center; gap:12px; flex-shrink:0; background:rgba(0,0,0,0.15); }
+.level-tag { font-family:var(--font-code); font-size:11px; background:rgba(192,132,252,0.12); border:1px solid rgba(192,132,252,0.3); border-radius:6px; padding:3px 10px; color:var(--purple); }
+.level-task { font-size:13px; color:var(--text); flex:1; }
+.progress-bar-wrap { width:90px; height:4px; background:var(--surface2); border-radius:4px; overflow:hidden; }
+.progress-bar-fill { height:100%; background:linear-gradient(90deg,var(--purple),var(--purple-bright)); border-radius:4px; transition:width 0.4s ease; }
+.code-body { flex:1; overflow-y:auto; padding:16px 20px; display:flex; flex-direction:column; gap:14px; }
+.code-body::-webkit-scrollbar { width:4px; }
+.code-body::-webkit-scrollbar-thumb { background:rgba(192,132,252,0.2); border-radius:4px; }
+.code-block { background:rgba(0,0,0,0.5); border-radius:10px; border:1px solid rgba(192,132,252,0.12); padding:16px; font-family:var(--font-code); font-size:13px; line-height:1.85; color:#c8b8e8; white-space:pre-wrap; position:relative; }
+.code-comment { color:#4a3a6a; }
+.code-kw { color:#c084fc; }
+.code-fn { color:#a5f3fc; }
+.code-str { color:#a7f3d0; }
+.code-num { color:#fed7aa; }
+.code-type { color:#fde68a; }
+.blank-input { display:inline-block; background:rgba(192,132,252,0.08); border:1px solid rgba(192,132,252,0.5); border-radius:4px; padding:2px 8px; min-width:80px; font-family:var(--font-code); font-size:13px; color:var(--blue); outline:none; transition:all 0.15s; cursor:text; }
+.blank-input:focus { background:rgba(34,211,238,0.1); border-color:var(--blue); box-shadow:0 0 0 2px rgba(34,211,238,0.15),0 0 10px rgba(34,211,238,0.1); }
+
+/* ── CLICKABLE HINT BOX ── */
+.hint-box {
+  background:rgba(34,211,238,0.03); border:1px solid rgba(34,211,238,0.2);
+  border-radius:10px; overflow:hidden; cursor:pointer; transition:all 0.2s;
+  user-select:none;
+}
+.hint-box:hover { border-color:rgba(34,211,238,0.4); background:rgba(34,211,238,0.06); }
+.hint-toggle {
+  display:flex; align-items:center; gap:10px; padding:10px 14px;
+  font-size:12px; color:#88dde8; font-family:var(--font);
+}
+.hint-toggle .hint-icon { font-size:14px; }
+.hint-toggle .hint-label { flex:1; font-weight:500; }
+.hint-toggle .hint-arrow { font-size:10px; transition:transform 0.25s; opacity:0.6; }
+.hint-box.open .hint-arrow { transform:rotate(180deg); }
+.hint-content {
+  max-height:0; overflow:hidden; transition:max-height 0.3s ease, padding 0.3s ease;
+  padding:0 14px; font-size:12px; color:#a0d4dc; line-height:1.6;
+  border-top:0px solid rgba(34,211,238,0.15);
+}
+.hint-box.open .hint-content {
+  max-height:120px; padding:10px 14px 12px;
+  border-top:1px solid rgba(34,211,238,0.15);
+}
+
+/* difficulty badge */
+.diff-badge { display:inline-block; font-family:var(--font-code); font-size:9px; letter-spacing:1px; text-transform:uppercase; padding:2px 8px; border-radius:10px; margin-left:8px; }
+.diff-easy   { background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3); }
+.diff-medium { background:rgba(251,191,36,0.12); color:#fbbf24; border:1px solid rgba(251,191,36,0.3); }
+.diff-hard   { background:rgba(244,63,94,0.12);  color:#f43f5e; border:1px solid rgba(244,63,94,0.3);  }
+.diff-expert { background:rgba(192,132,252,0.12); color:#c084fc; border:1px solid rgba(192,132,252,0.35); }
+
+.code-footer { padding:12px 20px; border-top:1px solid rgba(192,132,252,0.12); display:flex; align-items:center; gap:12px; flex-shrink:0; background:rgba(0,0,0,0.15); }
+.run-btn { background:linear-gradient(135deg,var(--purple),var(--purple-dark)); border:none; border-radius:8px; padding:9px 20px; color:#fff; font-size:13px; font-weight:600; font-family:var(--font); cursor:pointer; transition:all 0.15s; display:flex; align-items:center; gap:6px; box-shadow:0 4px 16px rgba(147,51,234,0.4),0 0 20px rgba(192,132,252,0.15); }
+.run-btn:hover { transform:translateY(-1px); box-shadow:0 6px 24px rgba(147,51,234,0.5),0 0 30px rgba(192,132,252,0.2); }
+.run-btn:active { transform:scale(0.97); }
+.result-label { font-size:13px; font-weight:600; padding:6px 14px; border-radius:6px; display:none; }
+.result-label.correct { display:block; background:rgba(16,185,129,0.12); color:var(--success); border:1px solid rgba(16,185,129,0.3); }
+.result-label.wrong   { display:block; background:rgba(244,63,94,0.1);  color:var(--danger);  border:1px solid rgba(244,63,94,0.25); }
+
+/* ════ LEVEL COMPLETE ════ */
+#level-complete-overlay { position:fixed; inset:0; z-index:9999; background:rgba(7,4,15,0.8); backdrop-filter:blur(10px); display:flex; align-items:center; justify-content:center; animation:fadeIn 0.3s ease; }
+#level-complete-overlay.hidden { display:none; }
+@keyframes fadeIn { from{opacity:0;}to{opacity:1;} }
+.complete-card { background:linear-gradient(160deg,#130a2a,#0d0720); border:1px solid rgba(192,132,252,0.4); border-radius:24px; padding:48px; text-align:center; max-width:440px; box-shadow:0 40px 100px rgba(0,0,0,0.8),0 0 60px rgba(147,51,234,0.2); animation:cardPop 0.4s cubic-bezier(0.34,1.4,0.64,1); }
+@keyframes cardPop { from{transform:scale(0.7);opacity:0;}to{transform:scale(1);opacity:1;} }
+.complete-emoji { font-size:64px; margin-bottom:16px; display:block; animation:emoji-bounce 0.6s ease 0.2s; }
+@keyframes emoji-bounce { 0%{transform:scale(0);}60%{transform:scale(1.2);}100%{transform:scale(1);} }
+.complete-title { font-family:var(--font-display); font-size:32px; font-weight:800; background:linear-gradient(90deg,var(--purple),var(--purple-bright)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:8px; }
+.complete-subtitle { font-size:14px; color:var(--text2); margin-bottom:8px; }
+.complete-xp { font-family:var(--font-code); font-size:13px; color:var(--purple); background:rgba(192,132,252,0.1); border:1px solid rgba(192,132,252,0.3); border-radius:8px; padding:6px 16px; display:inline-block; margin-bottom:24px; }
+.complete-btns { display:flex; gap:12px; justify-content:center; }
+.complete-btn { padding:10px 24px; border-radius:10px; font-size:13px; font-weight:600; cursor:pointer; font-family:var(--font); transition:all 0.2s; border:none; }
+.complete-btn.primary { background:linear-gradient(135deg,var(--purple),var(--purple-dark)); color:#fff; box-shadow:0 4px 20px rgba(147,51,234,0.4); }
+.complete-btn.primary:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(147,51,234,0.5); }
+.complete-btn.secondary { background:rgba(192,132,252,0.1); border:1px solid rgba(192,132,252,0.3); color:var(--purple); }
+.complete-btn.secondary:hover { background:rgba(192,132,252,0.2); }
+
+/* ── Files / Logs / Trash ── */
+.files-window { width:680px; height:480px; top:120px; left:280px; }
+.files-sidebar { width:160px; border-right:1px solid rgba(192,132,252,0.12); padding:12px; background:rgba(0,0,0,0.2); }
+.files-sidebar-item { padding:7px 10px; border-radius:7px; font-size:12px; color:var(--text2); cursor:pointer; display:flex; align-items:center; gap:8px; transition:all 0.12s; }
+.files-sidebar-item:hover,.files-sidebar-item.active { background:var(--surface2); color:var(--text); }
+.files-grid { flex:1; padding:16px; overflow-y:auto; display:grid; grid-template-columns:repeat(4,1fr); gap:12px; align-content:start; }
+.file-item { display:flex; flex-direction:column; align-items:center; gap:6px; padding:10px 6px; border-radius:10px; cursor:pointer; transition:background 0.12s; }
+.file-item:hover { background:var(--surface2); }
+.file-icon { font-size:28px; }
+.file-name { font-size:11px; color:var(--text2); text-align:center; line-height:1.3; }
+.logs-window { width:600px; height:440px; top:140px; left:320px; }
+.logs-body { flex:1; padding:12px 16px; overflow-y:auto; font-family:var(--font-code); font-size:12px; line-height:2; }
+.log-line { display:flex; gap:12px; }
+.log-ts { color:var(--text3); min-width:80px; }
+.log-tag { padding:1px 6px; border-radius:4px; font-size:10px; font-weight:600; min-width:52px; text-align:center; }
+.log-tag.info  { background:rgba(34,211,238,0.15); color:var(--blue); }
+.log-tag.warn  { background:rgba(245,158,11,0.15); color:#f59e0b; }
+.log-tag.error { background:rgba(244,63,94,0.15);  color:var(--danger); }
+.log-tag.sys   { background:rgba(192,132,252,0.15); color:var(--purple); }
+.log-msg { color:var(--text2); }
+.trash-window { width:500px; height:360px; top:160px; left:340px; }
+.trash-empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; color:var(--text2); }
+.trash-empty .trash-ico { font-size:48px; opacity:0.3; }
+
+/* ── Notifs ── */
+#notif-area { position:fixed; top:44px; right:16px; z-index:9999; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
+.notif { background:rgba(7,4,15,0.95); backdrop-filter:blur(20px); border:1px solid rgba(192,132,252,0.2); border-radius:12px; padding:12px 16px; width:300px; display:flex; gap:12px; align-items:flex-start; box-shadow:0 8px 30px rgba(0,0,0,0.4),0 0 20px rgba(147,51,234,0.1); animation:notifSlide 0.3s ease forwards; pointer-events:auto; }
+@keyframes notifSlide { from{transform:translateX(120%);opacity:0;}to{transform:translateX(0);opacity:1;} }
+.notif.leaving { animation:notifLeave 0.25s ease forwards; }
+@keyframes notifLeave { to{transform:translateX(120%);opacity:0;} }
+.notif-icon-wrap { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.notif-icon-wrap.purple { background:rgba(192,132,252,0.2); }
+.notif-icon-wrap.green  { background:rgba(16,185,129,0.2); }
+.notif-icon-wrap.red    { background:rgba(244,63,94,0.2); }
+.notif-icon-wrap.blue   { background:rgba(34,211,238,0.2); }
+.notif-text { flex:1; }
+.notif-title { font-size:13px; font-weight:600; color:var(--text); margin-bottom:2px; }
+.notif-msg   { font-size:11px; color:var(--text2); line-height:1.4; }
+
+.win-resize { position:absolute; bottom:0; right:0; width:16px; height:16px; cursor:nw-resize; opacity:0.4; }
+.win-resize::after { content:''; position:absolute; bottom:4px; right:4px; width:8px; height:8px; border-right:2px solid var(--text2); border-bottom:2px solid var(--text2); border-radius:1px; }
+*{ scrollbar-width:thin; scrollbar-color:rgba(192,132,252,0.3) transparent; }
+#watermark { position:fixed; bottom:80px; right:30px; font-family:var(--font-display); font-size:11px; color:rgba(192,132,252,0.15); letter-spacing:3px; text-transform:uppercase; pointer-events:none; }
+.win.focused { border-color:rgba(192,132,252,0.3); }
+.win.focused .win-titlebar { background:rgba(192,132,252,0.07); }
+.hack-saved-flash { position:fixed; inset:0; z-index:99998; pointer-events:none; background:rgba(192,132,252,0.08); animation:hackFlash 0.6s ease forwards; }
+@keyframes hackFlash { 0%{opacity:0;}20%{opacity:1;}100%{opacity:0;} }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ SPLASH / LANDING SCREEN ══════════════ -->
+<div id="splash-screen" class="screen">
+  <div class="splash-content">
+    <div>
+      <div class="splash-badge">⚡ Cyber Escape Challenge v3.0</div>
+      <div class="splash-title">CYBER ESCAPE</div>
+      <div class="splash-subtitle">— Locked In —</div>
+    </div>
+    <div class="splash-monitor">
+      <div class="monitor-body">
+        <div class="monitor-screen">
+          <div class="type-line dim">> SYSTEM LOCKED — AUTH REQUIRED</div>
+          <div class="type-line dim">> Scanning for intrusion vectors...</div>
+          <div class="type-line">> Choose your lab to begin<span class="type-cursor"></span></div>
+        </div>
+      </div>
+      <div class="monitor-stand"><div class="monitor-neck"></div><div class="monitor-base"></div></div>
+    </div>
+    <div class="splash-desc">Hack into the mainframe by solving coding challenges. Each correct answer cracks open the next system layer. 30 levels per lab — can you breach them all?</div>
+    <div class="lab-selection">
+      <div class="lab-card python" onclick="enterLab('py')">
+        <div class="lab-card-glow"></div>
+        <div class="lab-levels-count">30 LEVELS</div>
+        <span class="lab-card-icon">🐍</span>
+        <div class="lab-card-name">Python Lab</div>
+        <div class="lab-card-desc">Fill-in-the-blank Python challenges — variables, loops, functions, OOP, recursion & algorithms.</div>
+        <div class="lab-card-btn">▶ Enter Python Lab</div>
+      </div>
+      <div class="lab-card c-lang" onclick="enterLab('c')">
+        <div class="lab-card-glow"></div>
+        <div class="lab-levels-count">30 LEVELS</div>
+        <span class="lab-card-icon">⚙️</span>
+        <div class="lab-card-name">C Lab</div>
+        <div class="lab-card-desc">Fill-in-the-blank C challenges — pointers, arrays, structs, memory management & bit ops.</div>
+        <div class="lab-card-btn">▶ Enter C Lab</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ LEVELS SCREEN ══════════════ -->
+<div id="levels-screen" class="screen hidden">
+  <div class="levels-page-content">
+    <div class="levels-back-btn" onclick="showSplash()">← Back</div>
+    <div class="levels-page-header">
+      <div class="levels-page-lab-icon" id="levels-page-icon">🐍</div>
+      <div class="levels-page-title">Select <span id="levels-page-lab-name">Python</span> Level</div>
+      <div class="levels-page-subtitle" id="levels-page-subtitle">COMPLETE LEVELS TO UNLOCK THE MAINFRAME</div>
+    </div>
+    <div class="levels-grid" id="levels-grid"></div>
+  </div>
+</div>
+
+<!-- ══════════════ DESKTOP SCREEN ══════════════ -->
+<div id="desktop-screen" class="screen hidden">
+  <div class="neon-orb neon-orb-1"></div>
+  <div class="neon-orb neon-orb-2"></div>
+  <div class="neon-orb neon-orb-3"></div>
+  <div id="statusbar">
+    <span class="logo">CYBER ESCAPE</span>
+    <div class="status-items">
+      <div class="status-pill"><div class="dot green"></div> Secure</div>
+      <div class="status-pill"><div class="dot purple"></div> Lab Active</div>
+      <div id="clock">00:00:00</div>
+    </div>
+  </div>
+  <div id="icons-area">
+    <div class="desk-icon" ondblclick="openWindow('python-lab')"><div class="icon-img purple-glass">🐍</div><span>Python Lab</span></div>
+    <div class="desk-icon" ondblclick="openWindow('c-lab')"><div class="icon-img blue-glass">⚙️</div><span>C Lab</span></div>
+    <div class="desk-icon" ondblclick="openWindow('files')"><div class="icon-img gray-glass">📁</div><span>Files</span></div>
+    <div class="desk-icon" ondblclick="openWindow('logs')"><div class="icon-img gray-glass">📋</div><span>System Logs</span></div>
+    <div class="desk-icon" ondblclick="openWindow('trash')"><div class="icon-img danger-glass">🗑️</div><span>Trash</span></div>
+  </div>
+  <div id="dock">
+    <div class="dock-icon" style="background:linear-gradient(145deg,rgba(192,132,252,0.3),rgba(147,51,234,0.15));border:1px solid rgba(192,132,252,0.3)" ondblclick="openWindow('python-lab')">🐍<div class="tooltip">Python Lab</div></div>
+    <div class="dock-icon" style="background:linear-gradient(145deg,rgba(34,211,238,0.25),rgba(8,145,178,0.15));border:1px solid rgba(34,211,238,0.3)" ondblclick="openWindow('c-lab')">⚙️<div class="tooltip">C Lab</div></div>
+    <div class="dock-sep"></div>
+    <div class="dock-icon" style="background:rgba(192,132,252,0.06);border:1px solid var(--border)" ondblclick="openWindow('files')">📁<div class="tooltip">Files</div></div>
+    <div class="dock-icon" style="background:rgba(192,132,252,0.06);border:1px solid var(--border)" ondblclick="openWindow('logs')">📋<div class="tooltip">Logs</div></div>
+    <div class="dock-sep"></div>
+    <div class="dock-icon" style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.2)" ondblclick="openWindow('trash')">🗑️<div class="tooltip">Trash</div></div>
+  </div>
+
+  <!-- Python Lab Window -->
+  <div id="python-lab-win" class="win lab-window" style="display:none;">
+    <div class="win-titlebar" data-win="python-lab-win">
+      <div class="win-controls">
+        <div class="wc close" onclick="closeWindow('python-lab-win')"></div>
+        <div class="wc min" onclick="minimizeWindow('python-lab-win')"></div>
+        <div class="wc max" onclick="maximizeWindow('python-lab-win')"></div>
+      </div>
+      <div class="win-title">🐍 Python Lab</div>
+      <div class="win-badge" id="py-badge">LVL 1</div>
+    </div>
+    <div class="win-body">
+      <div class="lab-layout">
+        <div class="levels-panel" id="py-levels"></div>
+        <div class="editor-area">
+          <div class="level-header">
+            <span class="level-tag" id="py-lvl-tag">LEVEL 01</span>
+            <span class="level-task" id="py-task">Complete the challenge</span>
+            <div class="progress-bar-wrap"><div class="progress-bar-fill" id="py-progress" style="width:0%"></div></div>
+          </div>
+          <div class="code-body" id="py-code-body"></div>
+          <div class="code-footer">
+            <button class="run-btn" onclick="runCode('py')">▶ Run Code</button>
+            <div class="result-label" id="py-result"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="win-resize"></div>
+  </div>
+
+  <!-- C Lab Window -->
+  <div id="c-lab-win" class="win lab-window" style="display:none;">
+    <div class="win-titlebar" data-win="c-lab-win">
+      <div class="win-controls">
+        <div class="wc close" onclick="closeWindow('c-lab-win')"></div>
+        <div class="wc min" onclick="minimizeWindow('c-lab-win')"></div>
+        <div class="wc max" onclick="maximizeWindow('c-lab-win')"></div>
+      </div>
+      <div class="win-title">⚙️ C Lab</div>
+      <div class="win-badge" id="c-badge">LVL 1</div>
+    </div>
+    <div class="win-body">
+      <div class="lab-layout">
+        <div class="levels-panel" id="c-levels"></div>
+        <div class="editor-area">
+          <div class="level-header">
+            <span class="level-tag" id="c-lvl-tag">LEVEL 01</span>
+            <span class="level-task" id="c-task">Complete the challenge</span>
+            <div class="progress-bar-wrap"><div class="progress-bar-fill" id="c-progress" style="width:0%"></div></div>
+          </div>
+          <div class="code-body" id="c-code-body"></div>
+          <div class="code-footer">
+            <button class="run-btn" onclick="runCode('c')">▶ Run Code</button>
+            <div class="result-label" id="c-result"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="win-resize"></div>
+  </div>
+
+  <!-- Files Window -->
+  <div id="files-win" class="win files-window" style="display:none;">
+    <div class="win-titlebar" data-win="files-win">
+      <div class="win-controls"><div class="wc close" onclick="closeWindow('files-win')"></div><div class="wc min"></div><div class="wc max"></div></div>
+      <div class="win-title">📁 Files</div>
+    </div>
+    <div class="win-body" style="flex-direction:row">
+      <div class="files-sidebar">
+        <div class="files-sidebar-item active">📁 Home</div><div class="files-sidebar-item">💻 Desktop</div>
+        <div class="files-sidebar-item">📄 Documents</div><div class="files-sidebar-item">🔒 Encrypted</div>
+        <div class="files-sidebar-item">🗂️ Archives</div>
+      </div>
+      <div class="files-grid">
+        <div class="file-item"><div class="file-icon">📄</div><div class="file-name">mission_brief.txt</div></div>
+        <div class="file-item"><div class="file-icon">🔒</div><div class="file-name">vault_key.enc</div></div>
+        <div class="file-item"><div class="file-icon">🐍</div><div class="file-name">decrypt.py</div></div>
+        <div class="file-item"><div class="file-icon">⚙️</div><div class="file-name">checker.c</div></div>
+        <div class="file-item"><div class="file-icon">📊</div><div class="file-name">logs_backup.csv</div></div>
+        <div class="file-item"><div class="file-icon">🗝️</div><div class="file-name">access_codes.enc</div></div>
+        <div class="file-item"><div class="file-icon">📁</div><div class="file-name">modules/</div></div>
+        <div class="file-item"><div class="file-icon">📄</div><div class="file-name">README.md</div></div>
+        <div class="file-item" id="hacked-file" style="display:none"><div class="file-icon">💾</div><div class="file-name">HACKED_system.dat</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logs Window -->
+  <div id="logs-win" class="win logs-window" style="display:none;">
+    <div class="win-titlebar" data-win="logs-win">
+      <div class="win-controls"><div class="wc close" onclick="closeWindow('logs-win')"></div><div class="wc min"></div><div class="wc max"></div></div>
+      <div class="win-title">📋 System Logs</div>
+      <div class="win-badge" style="color:var(--danger);border-color:rgba(244,63,94,0.3);background:rgba(244,63,94,0.1)">LIVE</div>
+    </div>
+    <div class="win-body"><div class="logs-body" id="logs-body"></div></div>
+  </div>
+
+  <!-- Trash Window -->
+  <div id="trash-win" class="win trash-window" style="display:none;">
+    <div class="win-titlebar" data-win="trash-win">
+      <div class="win-controls"><div class="wc close" onclick="closeWindow('trash-win')"></div><div class="wc min"></div><div class="wc max"></div></div>
+      <div class="win-title">🗑️ Trash</div>
+    </div>
+    <div class="win-body">
+      <div class="trash-empty"><div class="trash-ico">🗑️</div><div style="font-size:14px;font-weight:500">Trash is empty</div><div style="font-size:12px;color:var(--text3)">Deleted files appear here</div></div>
+    </div>
+  </div>
+
+  <div id="notif-area"></div>
+  <div id="watermark">CYBER ESCAPE v3.0 — LOCKED</div>
+</div>
+
+<!-- Level Complete Overlay -->
+<div id="level-complete-overlay" class="hidden">
+  <div class="complete-card">
+    <span class="complete-emoji" id="complete-emoji">✅</span>
+    <div class="complete-title" id="complete-title">Level Complete!</div>
+    <div class="complete-subtitle" id="complete-subtitle">System access +1%</div>
+    <div class="complete-xp" id="complete-xp">+150 XP — HACK SAVED</div>
+    <div class="complete-btns">
+      <button class="complete-btn secondary" onclick="goToLevelsPage()">⬡ Level Select</button>
+      <button class="complete-btn primary" id="complete-next-btn" onclick="nextLevel()">Next Level →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// LEVEL DATA — 30 levels each lab
+// ══════════════════════════════════════
+// difficulty: easy(1-8) medium(9-18) hard(19-25) expert(26-30)
+// hints are CLUES, not answers
+
+const LEVELS = {
+py: [
+  // ── EASY 1-8 ──
+  {title:"Hello, Hacker",diff:"easy",task:"Print 'Access Granted' to breach the terminal",xp:100,
+   code:`<span class="code-comment"># Level 1 — Output a string to the terminal</span>\n\n<span class="code-kw">print</span>(<input class="blank-input" placeholder='___' size='16'>)`,
+   hint:"The print function outputs text. String literals need quotation marks around them.",
+   answers:['"Access Granted"',"'Access Granted'"]},
+
+  {title:"Variable Vault",diff:"easy",task:"Store integer 42 in a variable named 'access_code'",xp:110,
+   code:`<span class="code-comment"># Level 2 — Assign the correct value to unlock</span>\n\n<input class="blank-input" placeholder='___' size='12'> = <span class="code-num">42</span>\n<span class="code-kw">print</span>(access_code)`,
+   hint:"Variable names in Python are case-sensitive. The name should match exactly what print() is calling.",
+   answers:["access_code"]},
+
+  {title:"Type Recon",diff:"easy",task:"Get the data type of variable x using a built-in function",xp:120,
+   code:`<span class="code-comment"># Level 3 — Identify the type of a value</span>\n\nx = <span class="code-str">"classified"</span>\n<span class="code-kw">print</span>(<input class="blank-input" placeholder='____' size='8'>(x))`,
+   hint:"There's a Python built-in that tells you what kind of object something is. It starts with 't'.",
+   answers:["type"]},
+
+  {title:"Loop Breach",diff:"easy",task:"Complete the range() call to iterate exactly 5 times (0 to 4)",xp:130,
+   code:`<span class="code-comment"># Level 4 — Breach 5 access nodes</span>\n\n<span class="code-kw">for</span> i <span class="code-kw">in</span> <span class="code-fn">range</span>(<input class="blank-input" placeholder='_' size='4'>):\n    <span class="code-kw">print</span>(i)`,
+   hint:"range(n) produces numbers from 0 up to but NOT including n. You want exactly 5 iterations.",
+   answers:["5"]},
+
+  {title:"List Intercept",diff:"easy",task:"Access the third element (index 2) of the list",xp:140,
+   code:`<span class="code-comment"># Level 5 — Extract data from the intercept list</span>\n\ndata = [<span class="code-str">"alpha"</span>, <span class="code-str">"beta"</span>, <span class="code-str">"gamma"</span>, <span class="code-str">"delta"</span>]\n<span class="code-kw">print</span>(data[<input class="blank-input" placeholder='_' size='3'>])`,
+   hint:"Lists are zero-indexed. The first element is at position 0, so the third element is at position...",
+   answers:["2"]},
+
+  {title:"String Ops",diff:"easy",task:"Convert the string to uppercase using a string method",xp:150,
+   code:`<span class="code-comment"># Level 6 — Amplify the signal to uppercase</span>\n\nsignal = <span class="code-str">"breach"</span>\n<span class="code-kw">print</span>(signal.<input class="blank-input" placeholder='______' size='10'>())`,
+   hint:"Python strings have a method that returns a copy with all letters capitalized. Think of the opposite of lower().",
+   answers:["upper"]},
+
+  {title:"Conditional Gate",diff:"easy",task:"Complete the elif condition to check if x equals 0",xp:160,
+   code:`<span class="code-comment"># Level 7 — Gate logic for system access</span>\n\nx = <span class="code-num">0</span>\n<span class="code-kw">if</span> x > <span class="code-num">0</span>:\n    <span class="code-kw">print</span>(<span class="code-str">"positive"</span>)\n<span class="code-kw">elif</span> x <input class="blank-input" placeholder='____' size='5'> <span class="code-num">0</span>:\n    <span class="code-kw">print</span>(<span class="code-str">"zero"</span>)`,
+   hint:"You need an equality comparison operator — it checks if two values are identical. It uses two characters.",
+   answers:["=="]},
+
+  {title:"Function Forge",diff:"easy",task:"Define the missing keyword to create a function",xp:170,
+   code:`<span class="code-comment"># Level 8 — Forge a new function in the system</span>\n\n<input class="blank-input" placeholder='___' size='5'> hack(target):\n    <span class="code-kw">return</span> target + <span class="code-str">" breached"</span>\n\n<span class="code-kw">print</span>(hack(<span class="code-str">"vault"</span>))`,
+   hint:"Python uses a specific keyword to declare functions — it's short, 3 letters, short for 'define'.",
+   answers:["def"]},
+
+  // ── MEDIUM 9-18 ──
+  {title:"Dict Decode",diff:"medium",task:"Access the 'password' key from the dictionary",xp:190,
+   code:`<span class="code-comment"># Level 9 — Retrieve credentials from the data store</span>\n\ncreds = {<span class="code-str">"user"</span>: <span class="code-str">"admin"</span>, <span class="code-str">"password"</span>: <span class="code-str">"s3cr3t"</span>}\n<span class="code-kw">print</span>(creds[<input class="blank-input" placeholder='_________' size='12'>])`,
+   hint:"Dictionary values are accessed with their key inside square brackets. Keys are strings, so they need quotes.",
+   answers:['"password"',"'password'"]},
+
+  {title:"Slice & Dice",diff:"medium",task:"Slice the list to get only the last 3 elements",xp:210,
+   code:`<span class="code-comment"># Level 10 — Extract final sector from memory block</span>\n\nmem = [10, 20, 30, 40, 50, 60]\nlast3 = mem[<input class="blank-input" placeholder='___' size='5'>]\n<span class="code-kw">print</span>(last3)`,
+   hint:"Python slicing uses [start:end]. A negative start index counts from the end. To grab the last N items, think [-N:]",
+   answers:["-3:","3:","3:6"]},
+
+  {title:"Lambda Trap",diff:"medium",task:"Complete the lambda to square its input",xp:230,
+   code:`<span class="code-comment"># Level 11 — Create an anonymous squaring function</span>\n\nsquare = <span class="code-kw">lambda</span> x: <input class="blank-input" placeholder='_____' size='7'>\n<span class="code-kw">print</span>(square(<span class="code-num">9</span>))  <span class="code-comment"># → 81</span>`,
+   hint:"A lambda body is a single expression. To square a number means multiplying it by itself. The exponent operator in Python is **.",
+   answers:["x**2","x*x","x ** 2","x * x"]},
+
+  {title:"List Comp",diff:"medium",task:"Write a list comprehension to produce squares of 0–4",xp:250,
+   code:`<span class="code-comment"># Level 12 — Generate payload using list comprehension</span>\n\nsquares = [<input class="blank-input" placeholder='______________' size='18'> <span class="code-kw">for</span> x <span class="code-kw">in</span> <span class="code-fn">range</span>(<span class="code-num">5</span>)]\n<span class="code-kw">print</span>(squares)`,
+   hint:"List comprehensions start with an expression, then 'for variable in iterable'. The expression here should transform x.",
+   answers:["x**2","x*x","x ** 2"]},
+
+  {title:"Exception Handler",diff:"medium",task:"Catch a ZeroDivisionError with the correct except clause",xp:270,
+   code:`<span class="code-comment"># Level 13 — Handle division fault without crashing</span>\n\n<span class="code-kw">try</span>:\n    result = <span class="code-num">10</span> / <span class="code-num">0</span>\n<span class="code-kw">except</span> <input class="blank-input" placeholder='______________' size='18'>:\n    <span class="code-kw">print</span>(<span class="code-str">"Division fault trapped"</span>)`,
+   hint:"Python exception types are PascalCase. This one is thrown when you try dividing by zero. The name describes the error exactly.",
+   answers:["ZeroDivisionError","Exception"]},
+
+  {title:"*args Breach",diff:"medium",task:"Use *args to collect all positional arguments",xp:290,
+   code:`<span class="code-comment"># Level 14 — Collect unlimited intrusion targets</span>\n\n<span class="code-kw">def</span> <span class="code-fn">breach</span>(<input class="blank-input" placeholder='_____' size='7'>):\n    <span class="code-kw">for</span> t <span class="code-kw">in</span> targets:\n        <span class="code-kw">print</span>(<span class="code-str">f"Hacking </span>{t}<span class="code-str">"</span>)\n\nbreach(<span class="code-str">"db"</span>, <span class="code-str">"api"</span>, <span class="code-str">"vault"</span>)`,
+   hint:"The * prefix in a parameter name tells Python to pack all remaining positional arguments into a tuple. The variable is called 'targets' in the body.",
+   answers:["*targets"]},
+
+  {title:"Global Scope",diff:"medium",task:"Declare 'counter' as global inside the function",xp:310,
+   code:`<span class="code-comment"># Level 15 — Modify the global access counter</span>\n\ncounter = <span class="code-num">0</span>\n\n<span class="code-kw">def</span> <span class="code-fn">increment</span>():\n    <input class="blank-input" placeholder='__________' size='14'> counter\n    counter += <span class="code-num">1</span>\n\nincrement()\n<span class="code-kw">print</span>(counter)`,
+   hint:"Without this keyword, assigning to a variable inside a function creates a local copy. The keyword is one word.",
+   answers:["global"]},
+
+  {title:"Decorator Shield",diff:"medium",task:"Apply the 'shield' decorator to the 'hack' function",xp:340,
+   code:`<span class="code-comment"># Level 16 — Apply protection layer to the function</span>\n\n<span class="code-kw">def</span> <span class="code-fn">shield</span>(fn):\n    <span class="code-kw">def</span> <span class="code-fn">wrapper</span>(*args):\n        <span class="code-kw">print</span>(<span class="code-str">"[SHIELD ON]"</span>)\n        <span class="code-kw">return</span> fn(*args)\n    <span class="code-kw">return</span> wrapper\n\n<input class="blank-input" placeholder='_______' size='10'>\n<span class="code-kw">def</span> <span class="code-fn">hack</span>(t): <span class="code-kw">print</span>(<span class="code-str">f"Hacking </span>{t}<span class="code-str">"</span>)`,
+   hint:"Decorators are applied with the @ symbol followed by the decorator name, on the line directly above the function definition.",
+   answers:["@shield"]},
+
+  {title:"Generator Core",diff:"medium",task:"Use the correct keyword to make this a generator function",xp:360,
+   code:`<span class="code-comment"># Level 17 — Stream data without loading it all</span>\n\n<span class="code-kw">def</span> <span class="code-fn">breach_stream</span>(n):\n    <span class="code-kw">for</span> i <span class="code-kw">in</span> <span class="code-fn">range</span>(n):\n        <input class="blank-input" placeholder='_____' size='7'> i * <span class="code-num">2</span>\n\n<span class="code-kw">for</span> val <span class="code-kw">in</span> breach_stream(<span class="code-num">5</span>): <span class="code-kw">print</span>(val)`,
+   hint:"Unlike return (which exits the function), this keyword pauses the function and sends a value to the caller, resuming from where it left off.",
+   answers:["yield"]},
+
+  {title:"Class Blueprint",diff:"medium",task:"Complete __init__ to store 'name' as an instance attribute",xp:380,
+   code:`<span class="code-comment"># Level 18 — Build the agent class constructor</span>\n\n<span class="code-kw">class</span> Agent:\n    <span class="code-kw">def</span> <span class="code-fn">__init__</span>(self, name):\n        <input class="blank-input" placeholder='__________' size='14'> = name\n\na = Agent(<span class="code-str">"Ghost"</span>)\n<span class="code-kw">print</span>(a.name)`,
+   hint:"Inside a method, instance attributes are accessed through 'self'. Dot notation attaches the attribute to the object.",
+   answers:["self.name"]},
+
+  // ── HARD 19-25 ──
+  {title:"Recursive Descent",diff:"hard",task:"Write the recursive call: factorial of (n-1)",xp:420,
+   code:`<span class="code-comment"># Level 19 — Recursive decryption routine</span>\n\n<span class="code-kw">def</span> <span class="code-fn">factorial</span>(n):\n    <span class="code-kw">if</span> n <= <span class="code-num">1</span>:\n        <span class="code-kw">return</span> <span class="code-num">1</span>\n    <span class="code-kw">return</span> n * <input class="blank-input" placeholder='___________' size='16'>\n\n<span class="code-kw">print</span>(factorial(<span class="code-num">6</span>))  <span class="code-comment"># → 720</span>`,
+   hint:"In recursion, the function calls itself with a smaller input. The base case handles n≤1; the recursive case handles n * factorial of what?",
+   answers:["factorial(n-1)","factorial(n - 1)"]},
+
+  {title:"Binary Search",diff:"hard",task:"Update mid-point index correctly in binary search",xp:450,
+   code:`<span class="code-comment"># Level 20 — Binary search through encrypted index</span>\n\n<span class="code-kw">def</span> <span class="code-fn">bsearch</span>(arr, target):\n    lo, hi = <span class="code-num">0</span>, len(arr)-<span class="code-num">1</span>\n    <span class="code-kw">while</span> lo <= hi:\n        mid = <input class="blank-input" placeholder='__________' size='16'>\n        <span class="code-kw">if</span> arr[mid] == target: <span class="code-kw">return</span> mid\n        <span class="code-kw">elif</span> arr[mid] < target: lo = mid+<span class="code-num">1</span>\n        <span class="code-kw">else</span>: hi = mid-<span class="code-num">1</span>`,
+   hint:"The midpoint is the average of lo and hi. Integer division (no remainder) is essential here to stay within list bounds.",
+   answers:["(lo+hi)//2","(lo + hi) // 2"]},
+
+  {title:"Context Manager",diff:"hard",task:"Complete the 'with' statement to open a file safely",xp:480,
+   code:`<span class="code-comment"># Level 21 — Open classified file safely</span>\n\n<span class="code-kw">with</span> <span class="code-fn">open</span>(<span class="code-str">"classified.txt"</span>, <span class="code-str">"r"</span>) <input class="blank-input" placeholder='_______' size='10'> f:\n    data = f.read()\n    <span class="code-kw">print</span>(data)`,
+   hint:"The 'with' statement binds the context manager's result to a variable. The keyword that introduces the variable binding is two letters.",
+   answers:["as"]},
+
+  {title:"Unpacking Cipher",diff:"hard",task:"Unpack first element and remaining as a list in one line",xp:510,
+   code:`<span class="code-comment"># Level 22 — Unpack the cipher transmission</span>\n\npacket = [<span class="code-num">1</span>, <span class="code-num">2</span>, <span class="code-num">3</span>, <span class="code-num">4</span>, <span class="code-num">5</span>]\n<input class="blank-input" placeholder='_____' size='6'>, *rest = packet\n<span class="code-kw">print</span>(first)   <span class="code-comment"># → 1</span>\n<span class="code-kw">print</span>(rest)    <span class="code-comment"># → [2,3,4,5]</span>`,
+   hint:"Extended unpacking lets you capture one value and 'the rest' with *. The single variable name here is what the code prints first.",
+   answers:["first"]},
+
+  {title:"Closure Lock",diff:"hard",task:"Return the inner function to create a closure",xp:540,
+   code:`<span class="code-comment"># Level 23 — Capture outer scope in a closure</span>\n\n<span class="code-kw">def</span> <span class="code-fn">make_lock</span>(key):\n    <span class="code-kw">def</span> <span class="code-fn">lock</span>(data):\n        <span class="code-kw">return</span> <span class="code-str">f"</span>{key}<span class="code-str">:</span>{data}<span class="code-str">"</span>\n    <input class="blank-input" placeholder='___________' size='14'>\n\nlock = make_lock(<span class="code-str">"AES"</span>)\n<span class="code-kw">print</span>(lock(<span class="code-str">"secret"</span>))`,
+   hint:"Closures work by returning the inner function object (not calling it). You need to return the reference to the inner function.",
+   answers:["return lock"]},
+
+  {title:"Dunder Magic",diff:"hard",task:"Implement __len__ to return the number of stored items",xp:580,
+   code:`<span class="code-comment"># Level 24 — Implement magic method for len()</span>\n\n<span class="code-kw">class</span> Vault:\n    <span class="code-kw">def</span> <span class="code-fn">__init__</span>(self):\n        self.items = []\n    <span class="code-kw">def</span> <input class="blank-input" placeholder='________' size='10'>(self):\n        <span class="code-kw">return</span> len(self.items)\n\nv = Vault()\nv.items = [<span class="code-num">1</span>,<span class="code-num">2</span>,<span class="code-num">3</span>]\n<span class="code-kw">print</span>(len(v))`,
+   hint:"Python magic (dunder) methods have double underscores on each side. The one that makes len() work on your object is named __???__.",
+   answers:["__len__"]},
+
+  {title:"Property Gate",diff:"hard",task:"Apply the @property decorator to the method",xp:620,
+   code:`<span class="code-comment"># Level 25 — Create computed read-only attribute</span>\n\n<span class="code-kw">class</span> Agent:\n    <span class="code-kw">def</span> <span class="code-fn">__init__</span>(self, name):\n        self._name = name\n\n    <input class="blank-input" placeholder='_________' size='12'>\n    <span class="code-kw">def</span> <span class="code-fn">name</span>(self):\n        <span class="code-kw">return</span> self._name.upper()\n\na = Agent(<span class="code-str">"ghost"</span>)\n<span class="code-kw">print</span>(a.name)`,
+   hint:"This built-in decorator transforms a method into an attribute-like access. It starts with '@' and is a Python built-in descriptor.",
+   answers:["@property"]},
+
+  // ── EXPERT 26-30 ──
+  {title:"Metaclass Override",diff:"expert",task:"Set the metaclass to 'type' explicitly in the class definition",xp:700,
+   code:`<span class="code-comment"># Level 26 — Override the metaclass of the Cipher class</span>\n\n<span class="code-kw">class</span> Cipher(<input class="blank-input" placeholder='_____________' size='18'>):\n    <span class="code-kw">pass</span>\n\n<span class="code-kw">print</span>(<span class="code-fn">type</span>(Cipher))  <span class="code-comment"># → &lt;class 'type'&gt;</span>`,
+   hint:"Metaclasses are specified with a keyword argument in the class header. The keyword is 'metaclass' and the default Python metaclass is called 'type'.",
+   answers:["metaclass=type"]},
+
+  {title:"Bit Masking",diff:"expert",task:"Use bitwise AND to extract the lowest 4 bits of x",xp:740,
+   code:`<span class="code-comment"># Level 27 — Mask the lower nibble of a byte value</span>\n\nx = <span class="code-num">0b11001010</span>  <span class="code-comment"># 202 decimal</span>\nnibble = x <input class="blank-input" placeholder='_______' size='10'>\n<span class="code-kw">print</span>(bin(nibble))  <span class="code-comment"># → 0b1010</span>`,
+   hint:"Bitwise AND (&) with a mask keeps only the bits that are 1 in BOTH operands. The lowest 4 bits mask in hex is 0xF, which is 15 in decimal.",
+   answers:["& 0xF","& 0b00001111","& 15","& 0x0F"]},
+
+  {title:"Async Coroutine",diff:"expert",task:"Declare this as an async function and await the result",xp:780,
+   code:`<span class="code-comment"># Level 28 — Launch an async breach coroutine</span>\n\n<span class="code-kw">import</span> asyncio\n\n<input class="blank-input" placeholder='_____' size='8'> <span class="code-kw">def</span> <span class="code-fn">breach</span>():\n    <span class="code-kw">await</span> asyncio.sleep(<span class="code-num">0</span>)\n    <span class="code-kw">return</span> <span class="code-str">"breached"</span>\n\nasyncio.run(breach())`,
+   hint:"To use 'await' inside a function, the function itself must be declared differently from regular functions. One extra keyword before 'def'.",
+   answers:["async"]},
+
+  {title:"Descriptor Protocol",diff:"expert",task:"Implement __get__ to return the value from the instance dict",xp:820,
+   code:`<span class="code-comment"># Level 29 — Implement the descriptor __get__ method</span>\n\n<span class="code-kw">class</span> Secure:\n    <span class="code-kw">def</span> <span class="code-fn">__set_name__</span>(self, owner, name):\n        self.name = name\n    <span class="code-kw">def</span> <input class="blank-input" placeholder='_______' size='10'>(self, obj, objtype=None):\n        <span class="code-kw">return</span> obj.__dict__.get(self.name)\n    <span class="code-kw">def</span> <span class="code-fn">__set__</span>(self, obj, val):\n        obj.__dict__[self.name] = val`,
+   hint:"Python's descriptor protocol uses three dunder methods: __set__, __delete__, and the one called when you READ an attribute value.",
+   answers:["__get__"]},
+
+  {title:"Memoize Cipher",diff:"expert",task:"Use functools.lru_cache decorator with maxsize=None",xp:900,
+   code:`<span class="code-comment"># Level 30 — Cache recursive results for speed</span>\n\n<span class="code-kw">from</span> functools <span class="code-kw">import</span> lru_cache\n\n<input class="blank-input" placeholder='____________________' size='26'>\n<span class="code-kw">def</span> <span class="code-fn">fib</span>(n):\n    <span class="code-kw">if</span> n < <span class="code-num">2</span>: <span class="code-kw">return</span> n\n    <span class="code-kw">return</span> fib(n-<span class="code-num">1</span>) + fib(n-<span class="code-num">2</span>)\n\n<span class="code-kw">print</span>(fib(<span class="code-num">40</span>))`,
+   hint:"lru_cache is applied as a decorator with @. When maxsize=None the cache has unlimited size. Look at how you'd call lru_cache() with that argument.",
+   answers:["@lru_cache(maxsize=None)","@lru_cache(maxsize = None)"]}
+],
+
+c: [
+  // ── EASY 1-8 ──
+  {title:"Hello Terminal",diff:"easy",task:"Include the correct header for printf to work",xp:100,
+   code:`<span class="code-comment">// Level 1 — Include the standard I/O header</span>\n\n<span class="code-kw">#include</span> <input class="blank-input" placeholder='_________' size='14'>\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-fn">printf</span>(<span class="code-str">"Access Granted\\n"</span>);\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"printf lives in C's standard I/O library. The header file name ends in .h, and it's wrapped in angle brackets.",
+   answers:["<stdio.h>"]},
+
+  {title:"Variable Vault",diff:"easy",task:"Declare an integer variable 'code' initialized to 42",xp:110,
+   code:`<span class="code-comment">// Level 2 — Declare and initialize an integer</span>\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <input class="blank-input" placeholder='________' size='12'> code = <span class="code-num">42</span>;\n    <span class="code-fn">printf</span>(<span class="code-str">"%d\\n"</span>, code);\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"In C, you must declare a variable's type before its name. A whole-number type that's neither too small nor too large is the most common one.",
+   answers:["int"]},
+
+  {title:"Printf Format",diff:"easy",task:"Use the correct format specifier to print a float",xp:120,
+   code:`<span class="code-comment">// Level 3 — Transmit a floating-point signal</span>\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-type">float</span> val = <span class="code-num">3.14</span>;\n    <span class="code-fn">printf</span>(<input class="blank-input" placeholder='_____' size='8'>, val);\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"printf format strings use % followed by a letter. For floating-point numbers like float/double the letter is 'f'. Don't forget quotes and \\n.",
+   answers:['"%f\\n"','"%f"','"%f\\n"']},
+
+  {title:"Loop Breach",diff:"easy",task:"Write the for-loop condition so it runs exactly 5 times",xp:130,
+   code:`<span class="code-comment">// Level 4 — Iterate through 5 access nodes</span>\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-kw">for</span>(<span class="code-type">int</span> i=<span class="code-num">0</span>; <input class="blank-input" placeholder='______' size='8'>; i++) {\n        <span class="code-fn">printf</span>(<span class="code-str">"%d\\n"</span>, i);\n    }\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"The middle part of a for loop is the continuation condition — it runs as long as this is true. Start at 0, stop before 5.",
+   answers:["i<5","i < 5"]},
+
+  {title:"Array Access",diff:"easy",task:"Access index 3 of the array (value 40)",xp:140,
+   code:`<span class="code-comment">// Level 5 — Extract value at index 3</span>\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-type">int</span> arr[] = {<span class="code-num">10</span>, <span class="code-num">20</span>, <span class="code-num">30</span>, <span class="code-num">40</span>, <span class="code-num">50</span>};\n    <span class="code-fn">printf</span>(<span class="code-str">"%d\\n"</span>, arr[<input class="blank-input" placeholder='_' size='3'>]);\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"C arrays are zero-indexed. arr[0]=10, arr[1]=20, arr[2]=30... which index holds 40?",
+   answers:["3"]},
+
+  {title:"String Print",diff:"easy",task:"Use the correct format specifier to print a char array",xp:150,
+   code:`<span class="code-comment">// Level 6 — Decode the char array signal</span>\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-type">char</span> msg[] = <span class="code-str">"BREACH"</span>;\n    <span class="code-fn">printf</span>(<input class="blank-input" placeholder='_____' size='8'>, msg);\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"Strings in C are char arrays. The format specifier for strings (character sequences) uses the letter 's' after %.",
+   answers:['"%s\\n"','"%s"']},
+
+  {title:"Ternary Gate",diff:"easy",task:"Complete the ternary to return 1 if x>0 else 0",xp:160,
+   code:`<span class="code-comment">// Level 7 — Ternary gate for signal routing</span>\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-type">int</span> x = <span class="code-num">5</span>;\n    <span class="code-type">int</span> result = (x > <span class="code-num">0</span>) <input class="blank-input" placeholder='_' size='3'> <span class="code-num">1</span> : <span class="code-num">0</span>;\n    <span class="code-fn">printf</span>(<span class="code-str">"%d\\n"</span>, result);\n}`,
+   hint:"The C ternary operator has the form: condition ? value_if_true : value_if_false. What character separates the condition from the true value?",
+   answers:["?"]},
+
+  {title:"Function Return",diff:"easy",task:"Write the correct return type for a function returning int",xp:170,
+   code:`<span class="code-comment">// Level 8 — Declare the function's return type</span>\n\n<input class="blank-input" placeholder='___' size='5'> <span class="code-fn">getCode</span>() {\n    <span class="code-kw">return</span> <span class="code-num">7331</span>;\n}\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-fn">printf</span>(<span class="code-str">"%d\\n"</span>, getCode());\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"In C, every function must declare what type of value it sends back. A function returning a whole number uses the most basic numeric type.",
+   answers:["int"]},
+
+  // ── MEDIUM 9-18 ──
+  {title:"Pointer Probe",diff:"medium",task:"Dereference the pointer to get x's value",xp:190,
+   code:`<span class="code-comment">// Level 9 — Dereference the address pointer</span>\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-type">int</span> x = <span class="code-num">99</span>;\n    <span class="code-type">int</span> *ptr = &x;\n    <span class="code-fn">printf</span>(<span class="code-str">"%d\\n"</span>, <input class="blank-input" placeholder='____' size='6'>);\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"ptr stores a memory address. To get the VALUE at that address, you need to dereference it. The dereference operator is a single character placed before the pointer name.",
+   answers:["*ptr"]},
+
+  {title:"Pointer Arithmetic",diff:"medium",task:"Advance the pointer to point to arr[2] using arithmetic",xp:210,
+   code:`<span class="code-comment">// Level 10 — Navigate pointer to offset [2]</span>\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-type">int</span> arr[] = {<span class="code-num">10</span>,<span class="code-num">20</span>,<span class="code-num">30</span>,<span class="code-num">40</span>};\n    <span class="code-type">int</span> *p = arr;\n    p = <input class="blank-input" placeholder='_______' size='10'>;\n    <span class="code-fn">printf</span>(<span class="code-str">"%d\\n"</span>, *p);  <span class="code-comment">// → 30</span>\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"Adding an integer to a pointer moves it that many elements forward. You want element at index 2, and p currently points to arr[0].",
+   answers:["p+2","arr+2","&arr[2]"]},
+
+  {title:"Struct Secrets",diff:"medium",task:"Access the 'id' field of the struct using dot notation",xp:230,
+   code:`<span class="code-comment">// Level 11 — Read struct field from memory</span>\n\n<span class="code-kw">struct</span> User { <span class="code-type">int</span> id; <span class="code-type">char</span> name[<span class="code-num">20</span>]; };\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-kw">struct</span> User u = {<span class="code-num">42</span>, <span class="code-str">"Ghost"</span>};\n    <span class="code-fn">printf</span>(<span class="code-str">"%d\\n"</span>, u<input class="blank-input" placeholder='___' size='5'>);\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"For a struct variable (not a pointer), you access members with a single character operator between the variable name and member name.",
+   answers:[".id"]},
+
+  {title:"Malloc Memory",diff:"medium",task:"Allocate memory for 5 integers using malloc",xp:250,
+   code:`<span class="code-comment">// Level 12 — Allocate heap memory for 5 ints</span>\n\n<span class="code-kw">#include</span> <span class="code-str">&lt;stdlib.h&gt;</span>\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-type">int</span> *arr = (<span class="code-type">int</span>*) <input class="blank-input" placeholder='______________' size='20'>;\n    arr[<span class="code-num">0</span>] = <span class="code-num">99</span>;\n    <span class="code-fn">free</span>(arr);\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"malloc takes the number of BYTES to allocate. To allocate N items of a type, multiply N by sizeof(that type). Use sizeof(int) for 5 ints.",
+   answers:["malloc(5*sizeof(int))","malloc(5 * sizeof(int))","malloc(sizeof(int)*5)"]},
+
+  {title:"Arrow Operator",diff:"medium",task:"Access struct member through a pointer using arrow notation",xp:270,
+   code:`<span class="code-comment">// Level 13 — Read struct via pointer</span>\n\n<span class="code-kw">struct</span> Node { <span class="code-type">int</span> val; };\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-kw">struct</span> Node n = {<span class="code-num">55</span>};\n    <span class="code-kw">struct</span> Node *p = &n;\n    <span class="code-fn">printf</span>(<span class="code-str">"%d\\n"</span>, p<input class="blank-input" placeholder='_____' size='7'>);\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"When you have a POINTER to a struct, there's a special operator (two characters) that combines dereference + dot access. It looks like an arrow.",
+   answers:["->val"]},
+
+  {title:"String Copy",diff:"medium",task:"Use the correct stdlib function to copy one string to another",xp:290,
+   code:`<span class="code-comment">// Level 14 — Copy string between buffers</span>\n\n<span class="code-kw">#include</span> <span class="code-str">&lt;string.h&gt;</span>\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-type">char</span> src[] = <span class="code-str">"NEXOS"</span>;\n    <span class="code-type">char</span> dst[<span class="code-num">10</span>];\n    <input class="blank-input" placeholder='______' size='10'>(dst, src);\n    <span class="code-fn">printf</span>(<span class="code-str">"%s\\n"</span>, dst);\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"The string.h library has a function that copies a null-terminated string. Its name starts with 'str' and ends with 'cpy'.",
+   answers:["strcpy"]},
+
+  {title:"Sizeof Probe",diff:"medium",task:"Use sizeof to get the byte size of a double",xp:310,
+   code:`<span class="code-comment">// Level 15 — Measure memory footprint of a type</span>\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-fn">printf</span>(<span class="code-str">"%zu\\n"</span>, <input class="blank-input" placeholder='_____________' size='16'>);\n    <span class="code-kw">return</span> <span class="code-num">0</span>;  <span class="code-comment">// → 8 on most systems</span>\n}`,
+   hint:"sizeof is a C operator (not a function) that returns the size in bytes of a type. It takes the type name in parentheses.",
+   answers:["sizeof(double)","sizeof (double)"]},
+
+  {title:"Typedef Alias",diff:"medium",task:"Use typedef to alias 'unsigned long' as 'u64'",xp:340,
+   code:`<span class="code-comment">// Level 16 — Create a type alias for unsigned long</span>\n\n<input class="blank-input" placeholder='______________________' size='28'> u64;\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    u64 x = <span class="code-num">18446744073709551615UL</span>;\n    <span class="code-fn">printf</span>(<span class="code-str">"%lu\\n"</span>, x);\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"typedef lets you give a new name to an existing type. The syntax is: typedef existing_type new_name;",
+   answers:["typedef unsigned long"]},
+
+  {title:"Enum Flags",diff:"medium",task:"Define enum with LOCKED=0, UNLOCKED=1, BREACHED=2",xp:360,
+   code:`<span class="code-comment">// Level 17 — Define access level enum flags</span>\n\n<span class="code-kw">enum</span> Status { <input class="blank-input" placeholder='______________________' size='28'> };\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-kw">enum</span> Status s = BREACHED;\n    <span class="code-fn">printf</span>(<span class="code-str">"%d\\n"</span>, s);  <span class="code-comment">// → 2</span>\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"Enum values start at 0 by default and auto-increment. If you list them without explicit values, they'll be 0, 1, 2... Just name them in order.",
+   answers:["LOCKED, UNLOCKED, BREACHED","LOCKED,UNLOCKED,BREACHED"]},
+
+  {title:"Bitwise XOR",diff:"medium",task:"XOR encrypt value x with key 0xAA",xp:380,
+   code:`<span class="code-comment">// Level 18 — XOR encryption with key 0xAA</span>\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-type">unsigned char</span> x = <span class="code-num">0x55</span>;\n    <span class="code-type">unsigned char</span> enc = x <input class="blank-input" placeholder='_______' size='10'>;\n    <span class="code-fn">printf</span>(<span class="code-str">"0x%X\\n"</span>, enc);  <span class="code-comment">// → 0xFF</span>\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"XOR (exclusive OR) uses the ^ operator in C. 0x55 XOR 0xAA flips all bits, giving 0xFF.",
+   answers:["^ 0xAA","^0xAA"]},
+
+  // ── HARD 19-25 ──
+  {title:"Recursive Descent",diff:"hard",task:"Write the recursive case: n * factorial(n-1)",xp:420,
+   code:`<span class="code-comment">// Level 19 — Recursive decryption key generator</span>\n\n<span class="code-type">int</span> <span class="code-fn">factorial</span>(<span class="code-type">int</span> n) {\n    <span class="code-kw">if</span> (n <= <span class="code-num">1</span>) <span class="code-kw">return</span> <span class="code-num">1</span>;\n    <span class="code-kw">return</span> <input class="blank-input" placeholder='________________' size='20'>;\n}\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-fn">printf</span>(<span class="code-str">"%d\\n"</span>, factorial(<span class="code-num">6</span>));\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"In a recursive factorial, the current number is multiplied by the factorial of the number one smaller. Express that as a C return statement.",
+   answers:["n * factorial(n-1)","n * factorial(n - 1)"]},
+
+  {title:"Linked Node",diff:"hard",task:"Use the arrow operator to set next->val to 20",xp:450,
+   code:`<span class="code-comment">// Level 20 — Wire linked list nodes together</span>\n\n<span class="code-kw">struct</span> Node { <span class="code-type">int</span> val; <span class="code-kw">struct</span> Node *next; };\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-kw">struct</span> Node a, b;\n    a.next = &b;\n    <input class="blank-input" placeholder='____________' size='16'> = <span class="code-num">20</span>;\n    <span class="code-fn">printf</span>(<span class="code-str">"%d\\n"</span>, b.val);\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"a.next is a pointer to b. To set b's val field through a.next pointer, chain the arrow operator from a.next.",
+   answers:["a.next->val"]},
+
+  {title:"Void Pointer",diff:"hard",task:"Cast a void* back to int* before dereferencing",xp:480,
+   code:`<span class="code-comment">// Level 21 — Cast void pointer to typed pointer</span>\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-type">int</span> x = <span class="code-num">42</span>;\n    <span class="code-type">void</span> *vp = &x;\n    <span class="code-type">int</span> val = *(<input class="blank-input" placeholder='______' size='8'>)vp;\n    <span class="code-fn">printf</span>(<span class="code-str">"%d\\n"</span>, val);\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"void pointers can't be dereferenced directly — you must cast them first. The cast syntax is (type*) before the pointer. You want an int pointer.",
+   answers:["int*"]},
+
+  {title:"Function Pointer",diff:"hard",task:"Declare a function pointer 'fp' that points to 'add'",xp:510,
+   code:`<span class="code-comment">// Level 22 — Assign function pointer to target</span>\n\n<span class="code-type">int</span> <span class="code-fn">add</span>(<span class="code-type">int</span> a, <span class="code-type">int</span> b) { <span class="code-kw">return</span> a+b; }\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-type">int</span> (*<input class="blank-input" placeholder='__' size='5'>)(<span class="code-type">int</span>,<span class="code-type">int</span>) = add;\n    <span class="code-fn">printf</span>(<span class="code-str">"%d\\n"</span>, fp(<span class="code-num">3</span>,<span class="code-num">4</span>));\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"The printf call uses it as fp(). You're filling in the variable name between (* and )(int,int). It must match what printf uses.",
+   answers:["fp"]},
+
+  {title:"Bit Shift Encrypt",diff:"hard",task:"Left-shift x by 3 bits to multiply by 8",xp:540,
+   code:`<span class="code-comment">// Level 23 — Bit-shift encryption of payload</span>\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-type">unsigned int</span> x = <span class="code-num">5</span>;\n    <span class="code-type">unsigned int</span> enc = x <input class="blank-input" placeholder='_____' size='7'>;\n    <span class="code-fn">printf</span>(<span class="code-str">"%u\\n"</span>, enc);  <span class="code-comment">// → 40</span>\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"Left-shifting by N bits multiplies by 2^N. 2^3 = 8, so 5 * 8 = 40. The left-shift operator in C is two characters.",
+   answers:["<< 3","<<3"]},
+
+  {title:"Variadic Args",diff:"hard",task:"Use va_start with the correct last named parameter",xp:580,
+   code:`<span class="code-comment">// Level 24 — Handle variadic argument list</span>\n\n<span class="code-kw">#include</span> <span class="code-str">&lt;stdarg.h&gt;</span>\n<span class="code-type">int</span> <span class="code-fn">sumAll</span>(<span class="code-type">int</span> count, ...) {\n    va_list ap;\n    <span class="code-fn">va_start</span>(ap, <input class="blank-input" placeholder='_____' size='8'>);\n    <span class="code-type">int</span> s=<span class="code-num">0</span>;\n    <span class="code-kw">for</span>(<span class="code-type">int</span> i=<span class="code-num">0</span>;i&lt;count;i++) s += <span class="code-fn">va_arg</span>(ap,<span class="code-type">int</span>);\n    <span class="code-fn">va_end</span>(ap);\n    <span class="code-kw">return</span> s;\n}`,
+   hint:"va_start needs to know where the variable arguments START — specifically, the name of the LAST named (fixed) parameter before the '...'",
+   answers:["count"]},
+
+  {title:"Struct Padding",diff:"hard",task:"Use __attribute__((packed)) to eliminate struct padding",xp:620,
+   code:`<span class="code-comment">// Level 25 — Pack struct to remove alignment padding</span>\n\n<span class="code-kw">struct</span> Packet {\n    <span class="code-type">char</span>  flag;\n    <span class="code-type">int</span>   data;\n    <span class="code-type">char</span>  end;\n} <input class="blank-input" placeholder='______________________' size='26'>;\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-fn">printf</span>(<span class="code-str">"%zu\\n"</span>, sizeof(<span class="code-kw">struct</span> Packet));<span class="code-comment">// → 6</span>\n}`,
+   hint:"GCC provides a struct attribute that removes padding bytes. It goes after the closing brace, before the semicolon.",
+   answers:["__attribute__((packed))"]},
+
+  // ── EXPERT 26-30 ──
+  {title:"Linked List Insert",diff:"expert",task:"Set new_node->next to head to prepend to the list",xp:700,
+   code:`<span class="code-comment">// Level 26 — Prepend a node to the linked list</span>\n\n<span class="code-kw">struct</span> Node {<span class="code-type">int</span> v; <span class="code-kw">struct</span> Node *next;};\n\n<span class="code-kw">struct</span> Node* <span class="code-fn">prepend</span>(<span class="code-kw">struct</span> Node *head, <span class="code-type">int</span> val) {\n    <span class="code-kw">struct</span> Node *n = malloc(sizeof(<span class="code-kw">struct</span> Node));\n    n->v = val;\n    <input class="blank-input" placeholder='_____________' size='18'> = head;\n    <span class="code-kw">return</span> n;\n}`,
+   hint:"To prepend, the new node's 'next' pointer must point to the current head of the list. Use arrow notation since n is a pointer.",
+   answers:["n->next"]},
+
+  {title:"Memory Overlap",diff:"expert",task:"Use memmove (not memcpy) to safely copy overlapping regions",xp:740,
+   code:`<span class="code-comment">// Level 27 — Safe overlap copy of memory regions</span>\n\n<span class="code-kw">#include</span> <span class="code-str">&lt;string.h&gt;</span>\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-type">char</span> buf[] = <span class="code-str">"ABCDEFGH"</span>;\n    <input class="blank-input" placeholder='________' size='12'>(buf+<span class="code-num">2</span>, buf, <span class="code-num">5</span>);\n    <span class="code-fn">printf</span>(<span class="code-str">"%s\\n"</span>, buf);  <span class="code-comment">// → ABABCDE</span>\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"memcpy has undefined behavior with overlapping source and destination. There's a safer variant that handles overlaps. Its name hints at 'moving'.",
+   answers:["memmove"]},
+
+  {title:"Signal Handler",diff:"expert",task:"Register 'handler' for SIGINT using signal()",xp:780,
+   code:`<span class="code-comment">// Level 28 — Register SIGINT signal handler</span>\n\n<span class="code-kw">#include</span> <span class="code-str">&lt;signal.h&gt;</span>\n<span class="code-type">void</span> <span class="code-fn">handler</span>(<span class="code-type">int</span> s){}\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <input class="blank-input" placeholder='____________________' size='26'>;\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"signal() takes two arguments: the signal number constant and a function pointer to the handler. SIGINT is the Ctrl+C interrupt signal.",
+   answers:["signal(SIGINT, handler)"]},
+
+  {title:"Posix Thread",diff:"expert",task:"Create a pthread with pthread_create using all 4 args",xp:820,
+   code:`<span class="code-comment">// Level 29 — Spawn a POSIX thread for parallel breach</span>\n\n<span class="code-kw">#include</span> <span class="code-str">&lt;pthread.h&gt;</span>\n<span class="code-type">void</span>* <span class="code-fn">run</span>(<span class="code-type">void</span> *a){<span class="code-kw">return</span> NULL;}\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    pthread_t tid;\n    <input class="blank-input" placeholder='________________________________' size='36'>;\n    pthread_join(tid, NULL);\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"pthread_create takes: &thread_id, attributes (NULL for default), function pointer, and argument (NULL if none). Returns 0 on success.",
+   answers:["pthread_create(&tid, NULL, run, NULL)"]},
+
+  {title:"setjmp Escape",diff:"expert",task:"Call longjmp to jump back with value 1",xp:900,
+   code:`<span class="code-comment">// Level 30 — Non-local jump to escape handler</span>\n\n<span class="code-kw">#include</span> <span class="code-str">&lt;setjmp.h&gt;</span>\njmp_buf env;\n\n<span class="code-type">void</span> <span class="code-fn">escape</span>() {\n    <input class="blank-input" placeholder='________________' size='22'>;\n}\n\n<span class="code-type">int</span> <span class="code-fn">main</span>() {\n    <span class="code-kw">if</span>(!setjmp(env)) { escape(); }\n    <span class="code-kw">else</span> { <span class="code-fn">printf</span>(<span class="code-str">"Escaped!\\n"</span>); }\n    <span class="code-kw">return</span> <span class="code-num">0</span>;\n}`,
+   hint:"longjmp takes two arguments: the jmp_buf to jump back to, and the value to return from setjmp (must be non-zero to distinguish from initial call).",
+   answers:["longjmp(env, 1)","longjmp(env,1)"]}
+]
+};
+
+// ══════════════════════════════════════
+// GAME STATE
+// ══════════════════════════════════════
+const state = {
+  py: { current:0, unlocked:1, done:new Set() },
+  c:  { current:0, unlocked:1, done:new Set() },
+  activeLab:'py'
+};
+
+// ══════════════════════════════════════
+// SCREEN NAVIGATION
+// ══════════════════════════════════════
+function showScreen(id) {
+  ['splash-screen','levels-screen','desktop-screen'].forEach(s => {
+    document.getElementById(s).classList.add('hidden');
+  });
+  document.getElementById(id).classList.remove('hidden');
+}
+function showSplash() { showScreen('splash-screen'); }
+
+function enterLab(lab) {
+  state.activeLab = lab;
+  const isC = lab==='c';
+  document.getElementById('levels-page-icon').textContent     = isC ? '⚙️' : '🐍';
+  document.getElementById('levels-page-lab-name').textContent = isC ? 'C'  : 'Python';
+  buildLevelsPage(lab);
+  showScreen('levels-screen');
+}
+
+function buildLevelsPage(lab) {
+  const grid = document.getElementById('levels-grid');
+  grid.innerHTML = '';
+  const s = state[lab];
+  LEVELS[lab].forEach((lvl, i) => {
+    const num      = i + 1;
+    const isDone   = s.done.has(i);
+    const isActive = i === s.current;
+    const isLocked = num > s.unlocked;
+    let cls = 'mini-computer';
+    if (isDone)   cls += ' done';
+    else if (isActive) cls += ' active';
+    if (isLocked) cls += ' locked';
+    const numColor = isDone?'#10b981':isActive?'#f0abfc':isLocked?'#3a2a50':'#c084fc';
+    const icon     = isDone?'✅':isLocked?'🔒':isActive?'⚡':'○';
+    const numStr   = String(num).padStart(2,'0');
+    grid.innerHTML += `
+      <div class="${cls}" onclick="${isLocked?'':(`goToLevel('${lab}',${i})`)}">
+        <div class="mini-monitor-body">
+          <div class="mini-screen">
+            <div class="mini-level-num" style="color:${numColor}">${numStr}</div>
+            <div class="mini-level-icon">${icon}</div>
+          </div>
+        </div>
+        <div class="mini-neck"></div><div class="mini-base"></div>
+        <div class="mini-computer-label">${lvl.title}</div>
+      </div>`;
+  });
+}
+
+function goToLevel(lab, idx) {
+  state[lab].current = idx;
+  showScreen('desktop-screen');
+  openWindow(lab==='py'?'python-lab':'c-lab');
+  renderLevel(lab);
+}
+
+// ══════════════════════════════════════
+// LEVEL RENDERING
+// ══════════════════════════════════════
+const diffLabel = {easy:'Easy',medium:'Medium',hard:'Hard',expert:'Expert'};
+
+function renderLevel(lab) {
+  const s   = state[lab];
+  const lvl = LEVELS[lab][s.current];
+  const tag = lab==='py'?'py':'c';
+  const num = s.current + 1;
+  const total = LEVELS[lab].length;
+
+  document.getElementById(`${tag}-badge`).textContent   = `LVL ${num}`;
+  document.getElementById(`${tag}-lvl-tag`).textContent = `LEVEL ${String(num).padStart(2,'0')}`;
+  document.getElementById(`${tag}-task`).innerHTML      = lvl.task + ` <span class="diff-badge diff-${lvl.diff}">${diffLabel[lvl.diff]}</span>`;
+  document.getElementById(`${tag}-progress`).style.width = `${(s.done.size/total)*100}%`;
+
+  const body = document.getElementById(`${tag}-code-body`);
+  body.innerHTML = `
+    <div class="code-block">${lvl.code}</div>
+    <div class="hint-box" onclick="toggleHint(this)">
+      <div class="hint-toggle">
+        <span class="hint-icon">💡</span>
+        <span class="hint-label">Click to reveal a hint</span>
+        <span class="hint-arrow">▼</span>
+      </div>
+      <div class="hint-content">${lvl.hint}</div>
+    </div>`;
+
+  document.getElementById(`${tag}-result`).className = 'result-label';
+  document.getElementById(`${tag}-result`).textContent = '';
+  buildLevelsPanel(tag, lab);
+}
+
+function toggleHint(box) {
+  box.classList.toggle('open');
+  const label = box.querySelector('.hint-label');
+  label.textContent = box.classList.contains('open') ? 'Hide hint' : 'Click to reveal a hint';
+}
+
+function buildLevelsPanel(tag, lab) {
+  const panel  = document.getElementById(`${tag}-levels`);
+  const s      = state[lab];
+  panel.innerHTML = `<div class="levels-header">Levels</div>`;
+  LEVELS[lab].forEach((lvl,i) => {
+    const num      = String(i+1).padStart(2,'0');
+    const isDone   = s.done.has(i);
+    const isActive = i===s.current;
+    const isLocked = (i+1)>s.unlocked;
+    let cls = 'level-btn';
+    if (isActive) cls += ' active';
+    if (isDone)   cls += ' done';
+    if (isLocked) cls += ' locked';
+    const icon = isDone?'✓':isLocked?'🔒':'○';
+    panel.innerHTML += `<button class="${cls}" onclick="${isLocked?'':(`jumpLevel('${lab}',${i})`)}">
+      <span class="level-num">${num}</span>${lvl.title}<span class="level-lock">${icon}</span>
+    </button>`;
+  });
+}
+
+function jumpLevel(lab, idx) {
+  state[lab].current = idx;
+  renderLevel(lab);
+}
+
+// ══════════════════════════════════════
+// RUN CODE
+// ══════════════════════════════════════
+function runCode(lab) {
+  const s      = state[lab];
+  const lvl    = LEVELS[lab][s.current];
+  const inputs = document.querySelectorAll(`#${lab}-code-body .blank-input`);
+  const result = document.getElementById(`${lab}-result`);
+
+  let allCorrect = true;
+  inputs.forEach(inp => {
+    const val = inp.value.trim();
+    if (!lvl.answers.includes(val)) allCorrect = false;
+  });
+
+  if (allCorrect) {
+    result.textContent = '✓ Correct! Code executed.';
+    result.className   = 'result-label correct';
+    setTimeout(()=>showLevelComplete(lab), 500);
+  } else {
+    result.textContent = '✗ Incorrect. Check your answer.';
+    result.className   = 'result-label wrong';
+    showNotif('⚠️','red','Syntax Error','Check your code carefully and try again.',2500);
+  }
+}
+
+// ══════════════════════════════════════
+// LEVEL COMPLETE
+// ══════════════════════════════════════
+function showLevelComplete(lab) {
+  const s      = state[lab];
+  const lvl    = LEVELS[lab][s.current];
+  const isLast = s.current === LEVELS[lab].length - 1;
+
+  s.done.add(s.current);
+  if ((s.current+2) > s.unlocked) s.unlocked = s.current+2;
+
+  saveToSystem(lab, s.current, lvl);
+
+  document.getElementById('complete-emoji').textContent    = isLast?'🏆':'✅';
+  document.getElementById('complete-title').textContent   = isLast?'MAINFRAME CRACKED!':'Level Complete!';
+  document.getElementById('complete-subtitle').textContent = isLast?'You have breached the entire system!':`${lvl.title} — System Access Gained`;
+  document.getElementById('complete-xp').textContent      = `+${lvl.xp} XP — HACK SAVED TO SYSTEM`;
+  document.getElementById('complete-next-btn').style.display = isLast?'none':'';
+
+  document.getElementById('level-complete-overlay').classList.remove('hidden');
+
+  const flash = document.createElement('div');
+  flash.className = 'hack-saved-flash';
+  document.body.appendChild(flash);
+  setTimeout(()=>flash.remove(), 800);
+
+  showNotif('💾','purple','Saved to System',`Level ${s.current+1} hack logged.`,3000);
+}
+
+function saveToSystem(lab, levelIdx, lvl) {
+  const key  = `cyberEscape_${lab}_level_${levelIdx+1}`;
+  const data = { lab, level:levelIdx+1, title:lvl.title, xp:lvl.xp, completedAt:new Date().toISOString() };
+  try { localStorage.setItem(key, JSON.stringify(data)); } catch(e){}
+  document.getElementById('hacked-file').style.display = 'flex';
+  addLog('sys',`HACK SAVED: ${lab.toUpperCase()} LVL ${levelIdx+1} — ${lvl.title}`);
+}
+
+function nextLevel() {
+  const lab = state.activeLab;
+  document.getElementById('level-complete-overlay').classList.add('hidden');
+  state[lab].current++;
+  renderLevel(lab);
+}
+function goToLevelsPage() {
+  document.getElementById('level-complete-overlay').classList.add('hidden');
+  enterLab(state.activeLab);
+}
+
+// ══════════════════════════════════════
+// WINDOW MANAGEMENT
+// ══════════════════════════════════════
+let topZ = 500;
+const winPositions = {};
+
+function openWindow(name) {
+  const id  = name+'-win';
+  const win = document.getElementById(id);
+  if (!win) return;
+  if (win.style.display!=='none' && !win.classList.contains('minimized')) { bringToFront(win); return; }
+  win.classList.remove('minimized','closing');
+  win.style.display = 'flex';
+  bringToFront(win);
+  if (!winPositions[id]) {
+    const offset = Object.keys(winPositions).length * 30;
+    win.style.left = (200+offset)+'px';
+    win.style.top  = (80 +offset)+'px';
+    winPositions[id] = true;
+  }
+  if (name==='python-lab') { state.activeLab='py'; renderLevel('py'); }
+  if (name==='c-lab')      { state.activeLab='c';  renderLevel('c'); }
+  if (name==='logs') populateLogs();
+}
+function closeWindow(id) {
+  const win = document.getElementById(id);
+  win.classList.add('closing');
+  setTimeout(()=>{ win.style.display='none'; win.classList.remove('closing'); },200);
+}
+function minimizeWindow(id) { document.getElementById(id).classList.add('minimized'); }
+function maximizeWindow(id) {
+  const win = document.getElementById(id);
+  if (win.dataset.maximized==='1') {
+    win.style.cssText = win.dataset.prev||''; win.dataset.maximized='0';
+  } else {
+    win.dataset.prev = win.style.cssText;
+    win.style.left='0'; win.style.top='32px';
+    win.style.width='100vw'; win.style.height='calc(100vh - 32px)';
+    win.dataset.maximized='1';
+  }
+}
+function bringToFront(win) {
+  document.querySelectorAll('.win').forEach(w=>w.classList.remove('focused'));
+  win.classList.add('focused'); win.style.zIndex=++topZ;
+}
+
+document.addEventListener('mousedown', e => {
+  const tb = e.target.closest('.win-titlebar');
+  if (!tb) return;
+  const win = tb.closest('.win'); bringToFront(win);
+  const startX = e.clientX - win.offsetLeft, startY = e.clientY - win.offsetTop;
+  const onMove = e => { win.style.left=Math.max(0,e.clientX-startX)+'px'; win.style.top=Math.max(32,e.clientY-startY)+'px'; };
+  const onUp   = () => { document.removeEventListener('mousemove',onMove); document.removeEventListener('mouseup',onUp); };
+  document.addEventListener('mousemove',onMove); document.addEventListener('mouseup',onUp);
+});
+
+// ══════════════════════════════════════
+// NOTIFICATIONS
+// ══════════════════════════════════════
+function showNotif(icon, color, title, msg, duration=3000) {
+  const area = document.getElementById('notif-area');
+  const n    = document.createElement('div');
+  n.className = 'notif';
+  n.innerHTML = `<div class="notif-icon-wrap ${color}">${icon}</div>
+    <div class="notif-text"><div class="notif-title">${title}</div><div class="notif-msg">${msg}</div></div>`;
+  area.appendChild(n);
+  setTimeout(()=>{ n.classList.add('leaving'); setTimeout(()=>n.remove(),300); }, duration);
+}
+
+// ══════════════════════════════════════
+// LOGS
+// ══════════════════════════════════════
+const logData = [];
+function addLog(type, msg) {
+  const now = new Date();
+  const ts  = [now.getHours(),now.getMinutes(),now.getSeconds()].map(v=>String(v).padStart(2,'0')).join(':');
+  logData.unshift({ts,type,msg});
+  if (logData.length>50) logData.pop();
+}
+function populateLogs() {
+  const body = document.getElementById('logs-body');
+  if (!body) return;
+  const seed = [
+    ['info','System initialized — CYBER ESCAPE v3.0'],['warn','AUTH barrier active on port 7331'],
+    ['sys','Lab environment loaded'],['error','Unauthorized access attempt detected'],
+    ['info','Code execution engine ready'],['warn','Memory sector 0x7F encrypted'],
+  ];
+  const all = [...seed,...logData];
+  body.innerHTML = all.map(({ts,type,msg})=>
+    `<div class="log-line"><span class="log-ts">${ts}</span><span class="log-tag ${type}">${type.toUpperCase()}</span><span class="log-msg">${msg}</span></div>`
+  ).join('');
+}
+
+// ══════════════════════════════════════
+// CLOCK
+// ══════════════════════════════════════
+function updateClock() {
+  const n = new Date();
+  const t = [n.getHours(),n.getMinutes(),n.getSeconds()].map(v=>String(v).padStart(2,'0')).join(':');
+  const el = document.getElementById('clock');
+  if (el) el.textContent = t;
+}
+setInterval(updateClock,1000); updateClock();
+
+setTimeout(()=>showNotif('🔐','purple','Cyber Escape Ready','Select a lab from the landing screen.',4000), 500);
+addLog('info','System boot complete');
+addLog('warn','Intrusion countermeasures active');
+</script>
+</body>
+</html>
